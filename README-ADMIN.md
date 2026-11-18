@@ -2,7 +2,7 @@
 
 Este documento explica passo a passo como ativar o banco de dados (Firebase Firestore), o login administrativo (Firebase Authentication) e o envio de fotos (Cloudinary) sem precisar de servidor próprio.
 
-> Enquanto `site-config.js` estiver com os valores `COLE_AQUI`, o site público continua funcionando normalmente com o conteúdo estático atual, sem erros.
+> Enquanto as variáveis do Firebase no `.env` estiverem com os valores `COLE_AQUI`, o site público continua funcionando normalmente com o conteúdo estático atual, sem erros.
 
 ---
 
@@ -13,7 +13,7 @@ Este documento explica passo a passo como ativar o banco de dados (Firebase Fire
 3. Na tela inicial do projeto, clique no ícone da Web (`</>`) para registrar um aplicativo Web:
    - Informe um apelido (ex.: `Site ACTION`).
    - Não é necessário marcar o Firebase Hosting se for hospedar em outro lugar.
-   - Copie o objeto `firebaseConfig` (`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`) — você vai colá-lo no arquivo `site-config.js` na etapa 7.
+   - Copie o objeto `firebaseConfig` (`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`) — você vai colocá-lo nas variáveis do `.env` na etapa 7.
 
 ---
 
@@ -89,42 +89,51 @@ O envio de fotos acontece diretamente do navegador para o Cloudinary usando um *
 
 ---
 
-## 7. Preencher o arquivo `site-config.js`
+## 7. Configurar as variáveis de ambiente
 
-Abra o arquivo `site-config.js` na raiz do projeto e substitua os campos `COLE_AQUI`:
+Copie `.env.example` para `.env` na raiz do projeto e preencha as variáveis abaixo com os valores do Firebase e Cloudinary:
 
-```js
-window.ACTION_CONFIG = {
-  firebase: {
-    apiKey: 'SUA_API_KEY',
-    authDomain: 'SEU_PROJETO.firebaseapp.com',
-    projectId: 'SEU_PROJETO',
-    storageBucket: 'SEU_PROJETO.firebasestorage.app',
-    messagingSenderId: 'SEU_SENDER_ID',
-    appId: 'SEU_APP_ID'
-  },
-  cloudinary: {
-    cloudName: 'SEU_CLOUD_NAME',
-    uploadPreset: 'SEU_UPLOAD_PRESET_UNSIGNED'
-  },
-  whatsappNumber: '5521999999999',
-  phoneDisplay: '(21) 99999-9999',
-  instagramUrl: 'https://www.instagram.com/actionn.film/'
-};
+```dotenv
+FIREBASE_API_KEY=SUA_API_KEY
+FIREBASE_AUTH_DOMAIN=SEU_PROJETO.firebaseapp.com
+FIREBASE_PROJECT_ID=SEU_PROJETO
+FIREBASE_STORAGE_BUCKET=SEU_PROJETO.firebasestorage.app
+FIREBASE_MESSAGING_SENDER_ID=SEU_SENDER_ID
+FIREBASE_APP_ID=SEU_APP_ID
+FIREBASE_MEASUREMENT_ID=SEU_MEASUREMENT_ID
+
+CLOUDINARY_CLOUD_NAME=SEU_CLOUD_NAME
+CLOUDINARY_UPLOAD_PRESET=SEU_UPLOAD_PRESET_UNSIGNED
+
+WHATSAPP_NUMBER=5521999999999
+PHONE_DISPLAY=(21) 99999-9999
+INSTAGRAM_URL=https://www.instagram.com/actionn.film/
 ```
 
-> Nunca coloque `GEMINI_API_KEY`, `CLOUDINARY_API_SECRET` ou senhas em `site-config.js` ou em qualquer arquivo público.
+O servidor carrega o `.env` e disponibiliza no navegador apenas os campos públicos necessários. Para iniciar localmente, use `npm run dev`. Em produção, configure as mesmas variáveis no painel da hospedagem.
+
+> Nunca coloque `CLOUDINARY_API_SECRET`, senhas ou outras chaves privadas no `.env` usado pelo site ou em qualquer arquivo público. O envio direto do navegador requer um Upload Preset configurado como **Unsigned**.
+
+### Publicar na Vercel
+
+1. Importe o repositório na Vercel com a raiz do projeto como **Root Directory**.
+2. Em **Settings → Environment Variables**, cadastre as variáveis `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_APP_ID`, `FIREBASE_MEASUREMENT_ID`, `CLOUDINARY_CLOUD_NAME` e `CLOUDINARY_UPLOAD_PRESET`. Adicione também as variáveis de telefone e Instagram se quiser personalizá-los.
+3. Habilite as variáveis para os ambientes desejados (**Production**, **Preview** e/ou **Development**) e faça um novo deploy.
+
+O arquivo `.env` local é ignorado pelo Git e não é enviado à Vercel. A configuração pública é servida pela função `/api/site-config.js`.
+
+As páginas, folhas de estilo, scripts e imagens do site ficam em `public/`, diretório servido pela CDN da Vercel. Mantenha os arquivos estáticos nesse diretório para evitar que sejam respondidos pela função Express.
 
 ---
 
 ## 8. Como trocar o telefone da empresa depois
 
-`site-config.js` é a **única fonte** do telefone comercial usado no rodapé e no botão "Enviar pelo WhatsApp":
+As variáveis `WHATSAPP_NUMBER` e `PHONE_DISPLAY` definem o telefone comercial usado no rodapé e no botão "Enviar pelo WhatsApp":
 
-1. Abra `site-config.js`.
-2. Altere `whatsappNumber` para o novo número somente com dígitos (`55` + DDD + número, ex.: `'5521988887777'`).
-3. Altere `phoneDisplay` para o formato de exibição desejado (ex.: `'(21) 98888-7777'`).
-4. Salve e envie o arquivo atualizado para a hospedagem.
+1. Localmente, altere as variáveis correspondentes no `.env`; na Vercel, altere-as em **Settings → Environment Variables**.
+2. Defina `WHATSAPP_NUMBER` somente com dígitos (`55` + DDD + número, ex.: `5521988887777`).
+3. Defina `PHONE_DISPLAY` no formato de exibição desejado (ex.: `(21) 98888-7777`).
+4. Faça um novo deploy para aplicar as variáveis na Vercel.
 
 ---
 
